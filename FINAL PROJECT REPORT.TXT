@@ -1,0 +1,183 @@
+Final Project Report: Local Network Port Scanning
+🔹 Project Title:
+Local Network Port Scanning using Nmap and Wireshark
+
+🔹 Objective:
+To identify open ports and services on devices in the local network, analyze associated network traffic using Wireshark, and evaluate potential security risks.
+
+🔹 Tools Used:
+
+Nmap
+Wireshark
+Linux/Windows OS
+GitHub (for version control and documentation)
+
+🔹 Steps Performed:
+
+Installed Nmap from the official website.
+Identified the local IP range (e.g., 192.168.1.0/24) using ipconfig/ifconfig.
+Performed a TCP SYN scan using:
+
+nmap -sS 192.168.1.0/24
+
+Noted down all live IPs and open ports.
+
+🔹 Scan Output Summary:
+Port	State	Service
+135/tcp	open	msrpc
+139/tcp	open	netbios-ssn
+445/tcp	open	microsoft-ds
+3306/tcp	open	mysql
+8000/tcp	open	http-alt
+8089/tcp	open	unknown
+
+
+Ran Wireshark simultaneously to capture network packets.
+
+
+Researched common services found on open ports.
+
+
+
+
+🔹 Risk Analysis:
+Port	Service 	    Risk Level	    Comments
+
+135  	MSRPC	        Medium	        Targeted in Windows remote exploits.
+139	    NetBIOS-SSN	    High	        Legacy protocol; exploitable via SMB vulnerabilities.
+445	   Microsoft-DS	    High	        Frequently targeted by ransomware and lateral movement.
+3306	MySQL	        Medium	        Vulnerable if exposed or misconfigured.
+8000	HTTP-Alt	    Low         	Often used for testing; access control needed.
+8089	Unknown/Splunk	Low	            Check Splunk or custom app exposure.
+
+Analyzed risks and exposure based on scan findings.
+
+Analyzed Services on Open Ports
+🔹 Port 135 – MSRPC (Microsoft Remote Procedure Call)
+What it does: Enables communication between Windows services. Used by DCOM and Windows Management Instrumentation (WMI).
+Risk: Often targeted in Windows exploits; can expose sensitive system operations.
+Recommendation:
+Block this port on public networks.
+Use firewall rules to restrict access to trusted IPs only.
+
+🔹 Port 139 – NetBIOS-SSN (NetBIOS Session Service)
+What it does: Used for Windows file/printer sharing in older networks.
+Risk: Vulnerable to NetBIOS spoofing and information disclosure attacks.
+Recommendation:
+Disable NetBIOS if not needed.
+Block access to this port externally.
+
+🔹 Port 445 – Microsoft-DS (Direct SMB over TCP)
+What it does: Used by SMB protocol for file and printer sharing in Windows networks.
+Risk: Heavily exploited (e.g., WannaCry, EternalBlue). Can be used for spreading malware across the network.
+
+Recommendation:
+Never expose port 445 to the internet.
+Disable SMBv1, use SMBv2/3, and patch frequently.
+Use internal firewalls to limit SMB access.
+
+🔹 Port 3306 – MySQL Database
+What it does: Default port for MySQL database server.
+Risk: If exposed, it may allow attackers to brute-force database credentials or exploit vulnerabilities.
+Recommendation:
+Never expose MySQL to the internet unless secured with VPN or SSH tunneling.
+Use strong credentials and limit access to known IPs.
+Enable SSL/TLS for encrypted communication.
+
+🔹 Port 8000 – HTTP-alt (Alternate HTTP Port)
+What it does: Often used for development web servers, dashboards, or alternate web services.
+Risk: May expose web apps or APIs that lack authentication or are still in development.
+Recommendation:
+Secure web services with authentication.
+Hide sensitive interfaces behind VPN or firewall.
+Regularly update the application and web frameworks.
+
+🔹 Port 8089 – Unknown / Splunkd (in Splunk setups)
+What it does: Often used by Splunk for management and REST API access.
+Risk: If Splunk or other apps use this port and are misconfigured, it can expose sensitive data or allow remote control.
+Recommendation:
+Restrict this port to localhost or internal trusted IPs.
+Use SSL and require authentication.
+Disable unused services bound to this port.
+Saved scan result and PCAP file for documentation.
+
+
+✅ Assessed Vulnerabilities and Saved Results
+1. 🔓 Port 135 – MSRPC
+Vulnerability: Used in exploits like MS03-026 (Blaster worm).
+Exposure: Exposing this port allows remote execution or denial-of-service attacks.
+
+Fix:
+Block access to port 135 from external IPs.
+Apply Windows updates regularly.
+
+2. 🔓 Port 139 – NetBIOS-SSN
+Vulnerability: Susceptible to enumeration and man-in-the-middle attacks (e.g., NBNS poisoning).
+Exposure: Can leak usernames, shares, and hostnames.
+
+Fix:
+Disable NetBIOS over TCP/IP if not required.
+Block port 139 on firewalls.
+
+3. 🔓 Port 445 – Microsoft-DS (SMB)
+Vulnerability: Exploited by ransomware (e.g., WannaCry via EternalBlue).
+Exposure: Remote code execution and lateral movement.
+Fix:
+
+Disable SMBv1.
+Apply latest patches.
+Use firewalls to isolate SMB access internally only.
+
+4. 🔓 Port 3306 – MySQL
+Vulnerability: Brute-force attacks or unauthenticated access to database.
+Exposure: Full database access if credentials are weak.
+
+Fix:
+Disable remote access if unnecessary.
+Use strong passwords and firewall rules.
+Limit access to trusted IPs only.
+
+5. 🔓 Port 8000 – HTTP-alt
+Vulnerability: Often hosts debug or development environments with little to no security.
+Exposure: May reveal APIs, logs, or admin panels.
+
+Fix:
+Restrict access with authentication.
+Do not expose dev interfaces publicly.
+
+6. 🔓 Port 8089 – Unknown (commonly Splunkd)
+Vulnerability: Can expose monitoring interfaces or API endpoints.
+Exposure: Misconfigured Splunk instances may allow remote queries or config access.
+
+Fix:
+Use HTTPS with authentication.
+Limit access to internal IPs.
+
+
+
+🔹 Security Recommendations:
+
+Disable unused services (especially SMB and NetBIOS).
+Restrict MySQL and web ports with firewalls or local ACLs.
+Apply patches and updates regularly.
+Use strong passwords and avoid default credentials.
+Continuously monitor the network using IDS/IPS tools.
+
+🔹 Key Learnings:
+
+Understood how port scanning reveals the attack surface.
+Gained hands-on experience using Nmap and interpreting results.
+Observed how port scans look in packet captures (via Wireshark).
+Practiced basic threat analysis on network services.
+
+
+
+🧾 Summary Table
+Port	   Service	        Risk Description	                    Recommended Fix
+
+135     	MSRPC	        Remote execution vulnerability	            Block externally, update Windows
+139	        NetBIOS	        Sensitive info leakage	                    Disable NetBIOS, block on firewall
+445	        SMB	            Vulnerable to ransomware and exploits	    Disable SMBv1, patch, restrict via firewall
+3306     	MySQL        	Brute-force or misconfigured DB access	    Restrict IPs, use strong creds, disable remote
+8000	    HTTP-alt    	Unprotected dev/admin panels	            Authenticate access, hide behind firewall
+8089	    Splunkd      	API exposure or misconfig vulnerabilities	Secure with auth, HTTPS, and internal firewall
